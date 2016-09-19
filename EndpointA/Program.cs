@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Contracts.Commands;
 using FileBasedRouting;
 using NServiceBus;
+using NServiceBus.Features;
+using NServiceBus.Persistence;
 
 namespace EndpointA
 {
@@ -20,10 +22,12 @@ namespace EndpointA
         {
             var endpointConfiguration = new EndpointConfiguration("endpointA");
 
-            endpointConfiguration.UsePersistence<InMemoryPersistence>();
+            endpointConfiguration.UsePersistence<InMemoryPersistence, StorageType.Timeouts>();
             endpointConfiguration.SendFailedMessagesTo("error");
+            endpointConfiguration.DisableFeature<AutoSubscribe>();
 
             endpointConfiguration.EnableFeature<FileBasedRoutingFeature>();
+            endpointConfiguration.UsePersistence<StaticRoutingPersistence, StorageType.Subscriptions>();
 
             var endpoint = await Endpoint.Start(endpointConfiguration);
 

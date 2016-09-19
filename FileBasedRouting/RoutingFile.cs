@@ -22,12 +22,12 @@ namespace FileBasedRouting
                     var config = new EndpointRoutingConfiguration();
                     config.LogicalEndpointName = endpointElement.Attribute("name").Value;
 
-                    config.Handles = endpointElement.Element("handles")
+                    config.Commands = endpointElement.Element("handles")
                         ?.Elements("command")
                         .Select(e => Type.GetType(e.Attribute("type").Value, true))
                         .ToArray() ?? new Type[0];
 
-                    config.Publishes = endpointElement.Element("publishes")
+                    config.Events = endpointElement.Element("handles")
                         ?.Elements("event")
                         .Select(e => Type.GetType(e.Attribute("type").Value, true))
                         .ToArray() ?? new Type[0];

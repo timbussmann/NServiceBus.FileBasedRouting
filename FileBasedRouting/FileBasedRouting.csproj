@@ -48,6 +48,8 @@
     <Compile Include="FileBasedRoutingFeature.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RoutingFile.cs" />
+    <Compile Include="StaticRoutingPersistence.cs" />
+    <Compile Include="StaticRoutingSubscriptionStorage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
