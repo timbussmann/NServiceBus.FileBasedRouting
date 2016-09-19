@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus;
@@ -12,20 +13,35 @@ namespace FileBasedRouting
 {
     class StaticRoutingSubscriptionStorage : ISubscriptionStorage
     {
-        private readonly Dictionary<MessageType, List<Subscriber>> subscribers;
+        private readonly RoutingTable routingTable;
+        private readonly TransportInfrastructure ti;
+        private Dictionary<MessageType, List<Subscriber>> subscribers;
 
-        public StaticRoutingSubscriptionStorage(IEnumerable<EndpointRoutingConfiguration> endpoints, List<EndpointInstance> endpointInstances, TransportInfrastructure ti)
+        public StaticRoutingSubscriptionStorage(RoutingTable routingTable, TransportInfrastructure ti)
+        {
+            this.routingTable = routingTable;
+            this.ti = ti;
+            Rebuild(this, EventArgs.Empty);
+
+            this.routingTable.routingDataUpdated += Rebuild;
+        }
+
+        private void Rebuild(object sender, EventArgs eventArgs)
         {
             Dictionary<MessageType, List<EndpointRoutingConfiguration>> subscriberEndpoints =
-                endpoints
+                routingTable.Endpoints
                     .SelectMany(x => x.Events, (configuration, type) => new {type, configuration})
                     .GroupBy(x => x.type)
                     .ToDictionary(x => new MessageType(x.Key), x => x.Select(v => v.configuration).ToList());
 
             Dictionary<string, List<Subscriber>> instances =
-                endpointInstances
-                .GroupBy(x => x.Endpoint)
-                .ToDictionary(x => x.Key, x => x.Select(e => new Subscriber(ti.ToTransportAddress(LogicalAddress.CreateRemoteAddress(e)), e.Endpoint)).ToList());
+                routingTable.EndpointInstances
+                    .GroupBy(x => x.Endpoint)
+                    .ToDictionary(x => x.Key,
+                        x =>
+                            x.Select(
+                                e => new Subscriber(ti.ToTransportAddress(LogicalAddress.CreateRemoteAddress(e)), e.Endpoint))
+                                .ToList());
 
             subscribers = subscriberEndpoints.ToDictionary(
                 x => x.Key,
