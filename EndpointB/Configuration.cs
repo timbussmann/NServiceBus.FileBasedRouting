@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Contracts.Commands;
 using FileBasedRouting;
 using NServiceBus;
+using NServiceBus.Features;
 using NServiceBus.Persistence;
 
 namespace EndpointB
@@ -17,6 +18,7 @@ namespace EndpointB
             endpointConfiguration.MakeInstanceUniquelyAddressable(discriminator);
 
             endpointConfiguration.UsePersistence<InMemoryPersistence, StorageType.Timeouts>();
+            endpointConfiguration.DisableFeature<AutoSubscribe>();
             endpointConfiguration.SendFailedMessagesTo("error");
 
             endpointConfiguration.EnableFeature<FileBasedRoutingFeature>();

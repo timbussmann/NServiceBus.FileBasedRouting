@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Routing;
@@ -20,8 +22,6 @@ namespace FileBasedRouting
             var commandRoutes = new List<RouteTableEntry>();
             var publishers = context.Settings.Get<Publishers>();
             var subscriptionRoutes = new List<PublisherTableEntry>();
-            var endpointInstances = context.Settings.Get<EndpointInstances>();
-            var instances = new List<EndpointInstance>();
 
             foreach (var endpoint in endpoints)
             {
@@ -29,15 +29,19 @@ namespace FileBasedRouting
                 {
                     commandRoutes.Add(new RouteTableEntry(command, UnicastRoute.CreateFromEndpointName(endpoint.LogicalEndpointName)));
                 }
-
-                instances.AddRange(endpoint.Instances);
             }
-
-            context.Container.ConfigureComponent(b => new StaticRoutingSubscriptionStorage(endpoints, context.Settings.Get<TransportInfrastructure>()), DependencyLifecycle.SingleInstance);
 
             routingTable.AddOrReplaceRoutes("FileBasedRouting", commandRoutes);
             publishers.AddOrReplacePublishers("FileBasedRouting", subscriptionRoutes);
-            endpointInstances.AddOrReplaceInstances("FileBasedRouting", instances);
+
+            List<EndpointInstance> instances = null;
+            using (var instanceMappingFile = File.OpenRead("instance-mapping.xml"))
+            {
+                var parser = new InstanceMappingFileParser();
+                instances = parser.Parse(XDocument.Load(instanceMappingFile));
+            }
+
+            context.Container.ConfigureComponent(b => new StaticRoutingSubscriptionStorage(endpoints, instances, context.Settings.Get<TransportInfrastructure>()), DependencyLifecycle.SingleInstance);
         }
     }
 }

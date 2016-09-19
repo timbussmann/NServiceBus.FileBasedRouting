@@ -10,7 +10,5 @@ namespace FileBasedRouting
         public Type[] Commands { get; set; }
 
         public Type[] Events { get; set; }
-
-        public EndpointInstance[] Instances { get; set; }
     }
 }

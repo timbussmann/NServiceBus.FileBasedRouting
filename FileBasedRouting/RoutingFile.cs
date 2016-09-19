@@ -32,12 +32,6 @@ namespace FileBasedRouting
                         .Select(e => Type.GetType(e.Attribute("type").Value, true))
                         .ToArray() ?? new Type[0];
 
-                    config.Instances = endpointElement.Element("instances")
-                        ?.Elements("instance")
-                        .Select(
-                            x => new EndpointInstance(config.LogicalEndpointName, x.Attribute("discriminator").Value))
-                        .ToArray() ?? new EndpointInstance[0];
-
                     configs.Add(config);
                 }
 

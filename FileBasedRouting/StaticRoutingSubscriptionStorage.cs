@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Extensibility;
+using NServiceBus.Routing;
 using NServiceBus.Transport;
 using NServiceBus.Unicast.Subscriptions;
 using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
@@ -13,7 +14,7 @@ namespace FileBasedRouting
     {
         private readonly Dictionary<MessageType, List<Subscriber>> subscribers;
 
-        public StaticRoutingSubscriptionStorage(IEnumerable<EndpointRoutingConfiguration> endpoints, TransportInfrastructure ti)
+        public StaticRoutingSubscriptionStorage(IEnumerable<EndpointRoutingConfiguration> endpoints, List<EndpointInstance> endpointInstances, TransportInfrastructure ti)
         {
             Dictionary<MessageType, List<EndpointRoutingConfiguration>> subscriberEndpoints =
                 endpoints
@@ -21,24 +22,27 @@ namespace FileBasedRouting
                     .GroupBy(x => x.type)
                     .ToDictionary(x => new MessageType(x.Key), x => x.Select(v => v.configuration).ToList());
 
+            Dictionary<string, List<Subscriber>> instances =
+                endpointInstances
+                .GroupBy(x => x.Endpoint)
+                .ToDictionary(x => x.Key, x => x.Select(e => new Subscriber(ti.ToTransportAddress(LogicalAddress.CreateRemoteAddress(e)), e.Endpoint)).ToList());
+
             subscribers = subscriberEndpoints.ToDictionary(
                 x => x.Key,
                 x =>
                     x.Value.SelectMany(
                         e =>
                         {
-                            var instances = e.Instances.Select(
-                                i =>
-                                    new Subscriber(ti.ToTransportAddress(LogicalAddress.CreateRemoteAddress(i)),
-                                        e.LogicalEndpointName));
-
-                            if (instances.Any())
+                            List<Subscriber> subscribedInstances;
+                            if (instances.TryGetValue(e.LogicalEndpointName, out subscribedInstances))
                             {
-                                return instances;
+                                return subscribedInstances;
                             }
 
-                            return new[] {new Subscriber(e.LogicalEndpointName, e.LogicalEndpointName)};
-
+                            return new List<Subscriber>(1)
+                            {
+                                new Subscriber(e.LogicalEndpointName, e.LogicalEndpointName)
+                            };
                         }).ToList());
         }
 
