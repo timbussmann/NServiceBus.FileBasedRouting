@@ -7,10 +7,8 @@ namespace FileBasedRouting
     {
         public string LogicalEndpointName { get; set; }
 
-        public Type[] Handles { get; set; }
+        public Type[] Commands { get; set; }
 
-        public Type[] Publishes { get; set; }
-
-        public EndpointInstance[] Instances { get; set; }
+        public Type[] Events { get; set; }
     }
 }

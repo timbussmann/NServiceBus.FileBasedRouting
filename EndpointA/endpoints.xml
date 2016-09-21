@@ -1,17 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <endpoints>
   <endpoint name="endpointA">
+    <handles>
+      <event type="Contracts.Events.DemoCommandReceived, Contracts" />
+    </handles>
   </endpoint>
   <endpoint name="endpointB">
-    <publishes>
-      <event type="Contracts.Events.DemoCommandReceived, Contracts" />
-    </publishes>
     <handles>
       <command type="Contracts.Commands.DemoCommand, Contracts" />
+      <event type="Contracts.Events.DemoEvent, Contracts" />
     </handles>
-    <instances>
-      <instance discriminator="1" />
-      <instance discriminator="2" />
-    </instances>
   </endpoint>
 </endpoints>
