@@ -17,12 +17,11 @@ namespace EndpointB
             var endpointConfiguration = new EndpointConfiguration("endpointB");
             endpointConfiguration.MakeInstanceUniquelyAddressable(discriminator);
 
-            endpointConfiguration.UsePersistence<InMemoryPersistence, StorageType.Timeouts>();
+            endpointConfiguration.UsePersistence<InMemoryPersistence>();
             endpointConfiguration.DisableFeature<AutoSubscribe>();
             endpointConfiguration.SendFailedMessagesTo("error");
 
             endpointConfiguration.EnableFeature<FileBasedRoutingFeature>();
-            endpointConfiguration.UsePersistence<StaticRoutingPersistence, StorageType.Subscriptions>();
 
             var endpoint = await Endpoint.Start(endpointConfiguration);
 
