@@ -27,7 +27,12 @@ namespace FileBasedRouting
                         .Select(e => Type.GetType(e.Attribute("type").Value, true))
                         .ToArray() ?? new Type[0];
 
-                    config.Events = endpointElement.Element("handles")
+                    config.SubscribedEvents = endpointElement.Element("handles")
+                        ?.Elements("event")
+                        .Select(e => Type.GetType(e.Attribute("type").Value, true))
+                        .ToArray() ?? new Type[0];
+
+                    config.PublishedEvents = endpointElement.Element("publishes")
                         ?.Elements("event")
                         .Select(e => Type.GetType(e.Attribute("type").Value, true))
                         .ToArray() ?? new Type[0];
