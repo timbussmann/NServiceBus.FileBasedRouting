@@ -26,9 +26,10 @@ namespace EndpointA
             endpointConfiguration.UsePersistence<InMemoryPersistence, StorageType.Timeouts>();
             endpointConfiguration.SendFailedMessagesTo("error");
             endpointConfiguration.DisableFeature<AutoSubscribe>();
+            endpointConfiguration.DisableFeature<MessageDrivenSubscriptions>();
 
             endpointConfiguration.EnableFeature<FileBasedRoutingFeature>();
-            endpointConfiguration.UsePersistence<StaticRoutingPersistence, StorageType.Subscriptions>();
+            //endpointConfiguration.UsePersistence<StaticRoutingPersistence, StorageType.Subscriptions>();
 
             var endpoint = await Endpoint.Start(endpointConfiguration);
 
