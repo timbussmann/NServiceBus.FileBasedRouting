@@ -19,10 +19,11 @@ namespace EndpointB
 
             endpointConfiguration.UsePersistence<InMemoryPersistence, StorageType.Timeouts>();
             endpointConfiguration.DisableFeature<AutoSubscribe>();
+            endpointConfiguration.DisableFeature<MessageDrivenSubscriptions>();
             endpointConfiguration.SendFailedMessagesTo("error");
 
             endpointConfiguration.EnableFeature<FileBasedRoutingFeature>();
-            endpointConfiguration.UsePersistence<StaticRoutingPersistence, StorageType.Subscriptions>();
+            //endpointConfiguration.UsePersistence<StaticRoutingPersistence, StorageType.Subscriptions>();
 
             var endpoint = await Endpoint.Start(endpointConfiguration);
 
